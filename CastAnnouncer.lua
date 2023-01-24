@@ -18,7 +18,7 @@ local date = date
 function addon:Debug(msg, source)
 
 	if not self.db.global.debugMode then return end
-	
+
 	source = source or ""
 	print(format(date("%H:%M:%S") .. " " .. "|c000072CA" .. "%s: " .. "|c00E6CC80%s", "CastAnnouncer" .. (source ~= "" and "_" .. source or ""), msg)) -- Display source/module if any was given
 
@@ -26,7 +26,7 @@ end
 
 do
 	local function AddSound(soundName,soundFile) SM:Register("Sound",soundName,soundFile) end
-	AddSound("Bell Toll Alliance", "Sound\\Doodad\\BellTollAlliance.wav") 
+	AddSound("Bell Toll Alliance", "Sound\\Doodad\\BellTollAlliance.wav")
 	AddSound("Bell Toll Horde", "Sound\\Doodad\\BellTollHorde.wav")
 	AddSound("Rubber Ducky", "Sound\\Doodad\\Goblin_Lottery_Open01.wav")
 	AddSound("Cartoon FX", "Sound\\Doodad\\Goblin_Lottery_Open03.wav")
@@ -46,8 +46,8 @@ end
 function SA_AddSound(soundName,soundFile)
 	assert(type(soundName) == "string","Bad argument #1. Expected a string")
 	assert(type(soundFile) == "string","Bad argument #2. Expected a string")
-	SM:Register("sound",soundName,"Interface\\Addons\\CastAnnouncer\\sounds\\"..soundFile) 
-end 
+	SM:Register("sound",soundName,"Interface\\Addons\\CastAnnouncer\\sounds\\"..soundFile)
+end
 
 local alert
 local gbl,pfl
@@ -86,15 +86,15 @@ UpdateClassHexes()
 if CUSTOM_CLASS_COLORS then CUSTOM_CLASS_COLORS:RegisterCallback(UpdateClassHexes) end
 
 local ColorName = setmetatable({}, {__index =
-	function(t, unit)
-		local class = select(2,UnitClass(unit))
-		if not class then return false end
-		local name = UnitName(unit)
-		local prev = rawget(t,name)
-		if prev then return prev end
-		t[name] = ClassColors[class]..name.."|r"
-		return t[name]
-	end,
+									function(t, unit)
+										local class = select(2,UnitClass(unit))
+										if not class then return false end
+										local name = UnitName(unit)
+										local prev = rawget(t,name)
+										if prev then return prev end
+										t[name] = ClassColors[class]..name.."|r"
+										return t[name]
+									end,
 })
 
 local Icons = setmetatable({}, {
@@ -128,10 +128,11 @@ local Defaults = {
 		YouText = "YOU",
 		ShowTarget = true,
 		TargetOnly = false,
-		Filters = { 
+		Filters = {
 			["*"] = {
 				Players = true,
 				NPCs = true,
+				Pets = true,
 				TargetIsSelf = false,
 			},
 		},
@@ -184,7 +185,7 @@ local colorHexes = {
 
 local function AddSpellInfo(list,keyiskey)
 	local temp = {}
-	for spellid,data in pairs(list) do 
+	for spellid,data in pairs(list) do
 		local spellName = GetSpellInfo(spellid)
 		if spellName then temp[spellName] = keyiskey and spellName or data end
 	end
@@ -195,525 +196,703 @@ end
 function addon:AddDefaultSpells()
 	if not pfl.Ignores then
 		pfl.Ignores =  {
-				[740] = true, -- Tranquility
-				[115203] = true, --Fort Brew
-				[198838] = true, --["Earthen Shield Totem"]
-				[104773] = true, --["Unending Resolve"]
-				[48792] = true, --["Icebound Fortitude"]
-				[192058] = true, --["Lightning Surge Totem"]
-				[204331] = true, --["Counterstrike Totem"]
-				[204332] = true, --["Windfury Totem"]
-				[5484] = true, --["Howl of Terror"]
-				[198144] = true, --["Ice Form"]
-				[12472] = true, --["Icy Veins"]
-				[204330] = true, --["Skyfury Totem"]
-				[98008] = true, --["Spirit Link Totem"]
-				[22812] = true, --["Barkskin"]
-				[23920] = true, --["Spell Reflection"]
-				[8122] = true, --["Psychic Scream"]
-				[45438] = true, --["Ice Block"]
-				[48707] = true, --["Anti-Magic Shell"]
-				[118038] = true, --["Die by the Sword"]
-				[187650] = true, --["Freezing Trap"]
-				[204336] = true, --["Grounding Totem"]
+			[740] = true, -- Tranquility
+			[115203] = true, --Fort Brew
+			[198838] = true, --["Earthen Shield Totem"]
+			[104773] = true, --["Unending Resolve"]
+			[48792] = true, --["Icebound Fortitude"]
+			[192058] = true, --["Lightning Surge Totem"]
+			[204331] = true, --["Counterstrike Totem"]
+			[204332] = true, --["Windfury Totem"]
+			[5484] = true, --["Howl of Terror"]
+			[198144] = true, --["Ice Form"]
+			[12472] = true, --["Icy Veins"]
+			[204330] = true, --["Skyfury Totem"]
+			[98008] = true, --["Spirit Link Totem"]
+			[22812] = true, --["Barkskin"]
+			[23920] = true, --["Spell Reflection"]
+			[8122] = true, --["Psychic Scream"]
+			[45438] = true, --["Ice Block"]
+			[48707] = true, --["Anti-Magic Shell"]
+			[118038] = true, --["Die by the Sword"]
+			[187650] = true, --["Freezing Trap"]
+			[204336] = true, --["Grounding Totem"]
 
 		}
 		AddSpellInfo(pfl.Ignores,true)
 	end
-	
+
 	if not pfl.SpellCasts then
 		pfl.SpellCasts =  {
-				-- Warlock
-				[6215] = 5782,
-				[6213] = 5782,
-				[5782] = { -- Fear
-					Color = "VIOLET",
-				},
-				[6358] = { -- Seduction
-					Color = "VIOLET",
-				},
-				[19244] = 24259,
-				[19647] = 24259,
-				[24259] = { -- Spell Lock Warlock's pet
-					Color = "VIOLET",
-				},
-				[5484] = { -- Howl of Terror
-					Color = "VIOLET",
-				},
-				[116858] = { -- Chaos Bolt
-					Color = "VIOLET",
-				},
-				[789] = 47860,
-				[17925] = 47860,
-				[17926] = 47860,
-				[27223] = 47860,
-				[47859] = 47860,
-				[47860] = { -- Death Coil
-					Color = "VIOLET",
-				},
-				[30283] = 47847,
-				[30413] = 47847,
-				[30414] = 47847,
-				[47846] = 47847,
-				[47847] = { -- Shadowfury
-					Color = "VIOLET",
-				},
-				[30153] = 47995,
-				[30195] = 47995,
-				[30197] = 47995,
-				[47995] = { -- Intercept Warlock's pet
-					Color = "VIOLET",
-				},
-				[710] = 47995,
-				[18647] = { -- Banish
-					Color = "VIOLET",
-				},
-				[48020] = { -- Demonic Circle: Teleport
-					Color = "VIOLET",
-				},
-				[48018] = { -- Demonic Circle: Summon
-					Color = "VIOLET",
-				},
-				[47241] = { -- Metamorphosis
-					Color = "VIOLET",
-				},
-				[47820] = { -- Rain of fire
-					Color = "VIOLET",
-				},
-				
-				
-				
-				-- CHAMAN
-				[51514] = { -- Hex
-					Color = "BLUE",
-				},
-				[64695] = { -- Earthgrab
-					Color = "BLUE",
-				},
-				[57994] = { -- Wind Shear
-					Color = "BLUE",
-				},
-				[51533] = { -- Feral spirit
-					Color = "BLUE",
-				},
-				[16190] = 16191,
-				[16191] = { -- Mana tide
-					Color = "BLUE",
-				},
-				
-				
-				
-				-- PALADIN
-				[20066] = { -- Repentance
-					Color = "PINK",
-				},
-				[10326] = { -- Turn Evil
-					Color = "PINK",
-				},
-				[853] = 10308,
-				[5588] = 10308,
-				[5589] = 10308,
-				[10308] = { -- Hammer of Justice
-					Color = "PINK",
-				},
-				[48819] = { -- Consecration
-					Color = "PINK",
-				},
-				
-				
-				-- HUNT
-				[1513] = 14327,
-				[14326] = 14327,
-				[14327] = { -- Scare Beast
-					Color = "PISTACHIO",
-				},
-				[34490] = { -- Silencing Shot
-					Color = "PISTACHIO",
-				},
-				[19386] = 49012,
-				[24132] = 49012,
-				[24133] = 49012,
-				[27068] = 49012,
-				[49011] = 49012,
-				[49012] = { -- Wyvern Sting
-					Color = "PISTACHIO",
-				},
-				[19503] = { -- Scatter Shot
-					Color = "PISTACHIO",
-				},
-				[24394] = 19577,
-				[19577] = { -- Intimidation
-					Color = "PISTACHIO",
-				},
-				[27065] = 49050,
-				[49049] = 49050,
-				[49050] = { -- Aimed Shot
-					Color = "PISTACHIO",
-				},
-				[60192] = { -- Freezing arrow
-					Color = "PISTACHIO",
-				},
-				[27753] = { -- Freezing trap
-					Color = "PISTACHIO",
-				},
-				[13809] = { -- Frost trap
-					Color = "PISTACHIO",
-				},
-				[1543] = { -- Flare
-					Color = "PISTACHIO",
-				},
-				
-				
-				-- DRUID
-				[339] = 53313,
-				[1062] = 53313,
-				[5195] = 53313,
-				[5196] = 53313,
-				[9852] = 53313,
-				[9853] = 53313,
-				[26989] = 53313,
-				[19975] = 53313,
-				[19974] = 53313,
-				[19973] = 53313,
-				[19972] = 53313,
-				[19971] = 53313,
-				[19970] = 53313,
-				[53308] = 53313,
-				[27010] = 53313,
-				[53313] = { -- Entangling Roots
-					Color = "ORANGE",
-				},
-				[33786] = { -- Cyclone
-					Color = "ORANGE",
-				},
-				[2637] = 18658,
-				[18657] = 18658,
-				[18658] = { -- Hibernate
-					Color = "ORANGE",
-				},
-				[8983] = { -- Bash
-					Color = "ORANGE",
-				},
-				[48447] = { -- Tranquility
-					Color = "ORANGE",
-				},
-				
-				
-				-- MAGE
-				[2139] = 55021,
-				[18469] = 55021,
-				[55021] = { -- Counterspell
-					Color = "AQUA",
-				},
-				[118] = 61780,
-				[12824] = 61780,
-				[12825] = 61780,
-				[12826] = 61780,
-				[28271] = 61780,
-				[28272] = 61780,
-				[61305] = 61780,
-				[61721] = 61780,
-				[61780] = { -- Polymorph
-					Color = "AQUA",
-				},
-				[42940] = { -- Blizzard
-					Color = "AQUA",
-				},
-				[31687] = { -- Summon Water Elem
-					Color = "AQUA",
-				},
-				[64346] = { -- Fiery Payback
-					Color = "AQUA",
-				},
-				
-				
-				
-				-- PRIEST
-				[605] = { -- Mind Control
-					Color = "TURQUOISE",
-				},
-				[15487] = { -- Silence
-					Color = "WHITE",
-				},
-				[9484] = 10955,
-				[9485] = 10955,
-				[10955] = { -- Shackle Undead
-					Color = "WHITE",
-				},
-				[8122] = 10890,
-				[8124] = 10890,
-				[10888] = 10890,
-				[10890] = { -- Psychic Scream
-					Color = "WHITE",
-				},
-				[64044] = { -- Psychic Horror
-					Color = "WHITE",
-				},
-				[53023] = { -- Mind Sear
-					Color = "WHITE",
-				},
-				[32375] = { -- Mass Dispel
-					Color = "WHITE",
-				},
-				[34433] = { -- Shadowfiend
-					Color = "WHITE",
-				},
-				[8129] = { -- Mana Burn
-					Color = "WHITE",
-				},
-				
-				
-				
-				-- ROGUE
-				[1766] = { -- Kick
-					Color = "YELLOW",
-				},
-				[2094] = { -- Blind
-					Color = "YELLOW",
-				},
-				[2070] = 51724,
-				[6770] = 51724,
-				[11297] = 51724,
-				[51724] = { -- Sap
-					Color = "YELLOW",
-				},
-				[408] = 8643,
-				[8643] = { -- Kidney Shot
-					Color = "YELLOW",
-				},
-				[51722] = { -- Dismantle
-					Color = "YELLOW",
-				},
-				
-				
-				
-				
-				-- WARRIOR
-				[3411] = { -- Intervene
-					Color = "TAN",
-				},
-				[6552] = { -- Pummel
-					Color = "TAN",
-				},
-				[3411] = { -- Shield Bash
-					Color = "TAN",
-				},
-				[676] = { -- Disarm
-					Color = "TAN",
-				},
-				[46968] = { -- Shockwave
-					Color = "TAN",
-				},
-				[12809] = { -- Concussion Blow
-					Color = "TAN",
-				},
-				[12292] = { -- Death Wish
-					Color = "TAN",
-				},
-				
-				
-				
-				-- DEATHKNIGHT
-				[47528] = { -- Mind Freeze
-					Color = "RED",
-				},
-				[47481] = { -- Gnaw
-					Color = "RED",
-				},
-				[47476] = { -- Strangulate
-					Color = "RED",
-				},
-				[48743] = { -- Death Pact
-					Color = "RED",
-				},
-				[49206] = { -- Summon Gargoyle
-					Color = "RED",
-				},
-				
-				
-				
-				[2006] = { -- Resurrection
-					Color = "GREEN",
-				},
-				[50769] = { -- Revive
-					Color = "GREEN",
-				},				
-				[2008] = { -- Ancestral Spirit
-					Color = "GREEN",
-				},
+			-- Warlock
+			[5782] = { -- Fear
+				Color = "VIOLET",
+			},
+			[6215] = { -- Fear
+				Color = "VIOLET",
+			},
+			[6213] = { -- Fear
+				Color = "VIOLET",
+			},
+			[6358] = { -- Seduction
+				Color = "VIOLET",
+			},
+			[24259] = { -- Spell Lock Warlock's pet
+				Color = "VIOLET",
+			},
+			[19244] = { -- Spell Lock Warlock's pet
+				Color = "VIOLET",
+			},
+			[19647] = { -- Spell Lock Warlock's pet
+				Color = "VIOLET",
+			},
+			[5484] = { -- Howl of Terror
+				Color = "VIOLET",
+			},
+			[59172] = { -- Chaos Bolt
+				Color = "VIOLET",
+			},
+			[47860] = { -- Death Coil
+				Color = "VIOLET",
+			},
+			[789] = { -- Death Coil
+				Color = "VIOLET",
+			},
+			[17925] = { -- Death Coil
+				Color = "VIOLET",
+			},
+			[17926] = { -- Death Coil
+				Color = "VIOLET",
+			},
+			[27223] = { -- Death Coil
+				Color = "VIOLET",
+			},
+			[47859] = { -- Death Coil
+				Color = "VIOLET",
+			},
+			[47847] = { -- Shadowfury
+				Color = "VIOLET",
+			},
+			[30283] = { -- Shadowfury
+				Color = "VIOLET",
+			},
+			[30413] = { -- Shadowfury
+				Color = "VIOLET",
+			},
+			[30414] = { -- Shadowfury
+				Color = "VIOLET",
+			},
+			[47846] = { -- Shadowfury
+				Color = "VIOLET",
+			},
+			[47995] = { -- Intercept Warlock's pet
+				Color = "VIOLET",
+			},
+			[30153] = { -- Intercept Warlock's pet
+				Color = "VIOLET",
+			},
+			[30195] = { -- Intercept Warlock's pet
+				Color = "VIOLET",
+			},
+			[30197] = { -- Intercept Warlock's pet
+				Color = "VIOLET",
+			},
+			[710] = { -- Intercept Warlock's pet
+				Color = "VIOLET",
+			},
+			[18647] = { -- Banish
+				Color = "VIOLET",
+			},
+			[48020] = { -- Demonic Circle: Teleport
+				Color = "VIOLET",
+			},
+			[48018] = { -- Demonic Circle: Summon
+				Color = "VIOLET",
+			},
+			[47241] = { -- Metamorphosis
+				Color = "VIOLET",
+			},
+			[47820] = { -- Rain of fire
+				Color = "VIOLET",
+			},
+
+			-- CHAMAN
+			[51514] = { -- Hex
+				Color = "BLUE",
+			},
+			[64695] = { -- Earthgrab
+				Color = "BLUE",
+			},
+			[57994] = { -- Wind Shear
+				Color = "BLUE",
+			},
+			[51533] = { -- Feral spirit
+				Color = "BLUE",
+			},
+			[16191] = { -- Mana tide
+				Color = "BLUE",
+			},
+			[16190] = { -- Mana tide
+				Color = "BLUE",
+			},
+			[8177] =  {Color = "BLUE"},  -- Grounding Totem
+			[61657] = {Color = "BLUE"},  -- Fire Nova Totem
+
+			-- PALADIN
+			[20066] = { -- Repentance
+				Color = "PINK",
+			},
+			[10326] = { -- Turn Evil
+				Color = "PINK",
+			},
+			[10308] = { -- Hammer of Justice
+				Color = "PINK",
+			},
+			[853] = { -- Hammer of Justice
+				Color = "PINK",
+			},
+			[5588] = { -- Hammer of Justice
+				Color = "PINK",
+			},
+			[5589] = { -- Hammer of Justice
+				Color = "PINK",
+			},
+			[48819] = { -- Consecration
+				Color = "PINK",
+			},
+			[48818] = { -- Consecration
+				Color = "PINK",
+			},
+
+			-- HUNT
+			[14327] = { -- Scare Beast
+				Color = "PISTACHIO",
+			},
+			[1513] = { -- Scare Beast
+				Color = "PISTACHIO",
+			},
+			[14326] = { -- Scare Beast
+				Color = "PISTACHIO",
+			},
+			[34490] = { -- Silencing Shot
+				Color = "PISTACHIO",
+			},
+			[49012] = { -- Wyvern Sting
+				Color = "PISTACHIO",
+			},
+			[19386] = { -- Wyvern Sting
+				Color = "PISTACHIO",
+			},
+			[24132] = { -- Wyvern Sting
+				Color = "PISTACHIO",
+			},
+			[24133] = { -- Wyvern Sting
+				Color = "PISTACHIO",
+			},
+			[27068] = { -- Wyvern Sting
+				Color = "PISTACHIO",
+			},
+			[49011] = { -- Wyvern Sting
+				Color = "PISTACHIO",
+			},
+			[19503] = { -- Scatter Shot
+				Color = "PISTACHIO",
+			},
+			[24394] = { -- Intimidation
+				Color = "PISTACHIO",
+			},
+			[19577] = { -- Intimidation
+				Color = "PISTACHIO",
+			},
+			[49050] = { -- Aimed Shot
+				Color = "PISTACHIO",
+			},
+			[27065] = { -- Aimed Shot
+				Color = "PISTACHIO",
+			},
+			[49049] = { -- Aimed Shot
+				Color = "PISTACHIO",
+			},
+			[60192] = { -- Freezing arrow
+				Color = "PISTACHIO",
+			},
+			[14311] = { -- Freezing trap
+				Color = "PISTACHIO",
+			},
+			[13809] = { -- Frost trap
+				Color = "PISTACHIO",
+			},
+			[1543] = { -- Flare
+				Color = "PISTACHIO",
+			},
+			[34600] = {Color = "PISTACHIO"},   -- Snake Trap
+
+			-- DRUID
+			[53313] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[339] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[1062] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[5195] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[5196] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[9852] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[9853] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[26989] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[19975] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[19974] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[19973] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[19972] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[19971] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[19970] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[53308] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[27010] = { -- Entangling Roots
+				Color = "ORANGE",
+			},
+			[33786] = { -- Cyclone
+				Color = "ORANGE",
+			},
+			[18658] = { -- Hibernate
+				Color = "ORANGE",
+			},
+			[2637] = { -- Hibernate
+				Color = "ORANGE",
+			},
+			[18657] = { -- Hibernate
+				Color = "ORANGE",
+			},
+			[8983] = { -- Bash
+				Color = "ORANGE",
+			},
+			[48447] = { -- Tranquility
+				Color = "ORANGE",
+			},
+
+
+			-- MAGE
+			[55021] = { -- Counterspell
+				Color = "AQUA",
+			},
+			[2139] = { -- Counterspell
+				Color = "AQUA",
+			},
+			[18469] = { -- Counterspell
+				Color = "AQUA",
+			},
+			[61780] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[118] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[12824] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[12825] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[12826] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[28271] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[28272] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[61305] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[61721] = { -- Polymorph
+				Color = "AQUA",
+			},
+			[42940] = { -- Blizzard
+				Color = "AQUA",
+			},
+			[31687] = { -- Summon Water Elem
+				Color = "AQUA",
+			},
+			[64346] = { -- Fiery Payback
+				Color = "AQUA",
+			},
+
+
+
+			-- PRIEST
+			[605] = { -- Mind Control
+				Color = "TURQUOISE",
+			},
+			[15487] = { -- Silence
+				Color = "WHITE",
+			},
+			[10955] = { -- Shackle Undead
+				Color = "WHITE",
+			},
+			[9484] = { -- Shackle Undead
+				Color = "WHITE",
+			},
+			[9485] = { -- Shackle Undead
+				Color = "WHITE",
+			},
+			[10890] = { -- Psychic Scream
+				Color = "WHITE",
+			},
+			[8122] = { -- Psychic Scream
+				Color = "WHITE",
+			},
+			[8124] = { -- Psychic Scream
+				Color = "WHITE",
+			},
+			[10888] = { -- Psychic Scream
+				Color = "WHITE",
+			},
+			[64044] = { -- Psychic Horror
+				Color = "WHITE",
+			},
+			[53023] = { -- Mind Sear
+				Color = "WHITE",
+			},
+			[32375] = { -- Mass Dispel
+				Color = "WHITE",
+			},
+			[34433] = { -- Shadowfiend
+				Color = "WHITE",
+			},
+			[8129] = { -- Mana Burn
+				Color = "WHITE",
+			},
+			[64843] = { -- Divine Hymn
+				Color = "WHITE",
+			},
+			[64901] = { -- Hymn of Hope
+				Color = "WHITE",
+			},
+
+
+			-- ROGUE
+			[1766] = { -- Kick
+				Color = "YELLOW",
+			},
+			[2094] = { -- Blind
+				Color = "YELLOW",
+			},
+			[51724] = { -- Sap
+				Color = "YELLOW",
+			},
+			[2070] = { -- Sap
+				Color = "YELLOW",
+			},
+			[6770] = { -- Sap
+				Color = "YELLOW",
+			},
+			[11297] = { -- Sap
+				Color = "YELLOW",
+			},
+			[8643] = { -- Kidney Shot
+				Color = "YELLOW",
+			},
+			[408] = { -- Kidney Shot
+				Color = "YELLOW",
+			},
+			[51722] = { -- Dismantle
+				Color = "YELLOW",
+			},
+
+
+
+
+			-- WARRIOR
+			[3411] = { -- Intervene
+				Color = "TAN",
+			},
+			[6552] = { -- Pummel
+				Color = "TAN",
+			},
+			[72] = { -- Shield Bash
+				Color = "TAN",
+			},
+			[676] = { -- Disarm
+				Color = "TAN",
+			},
+			[46968] = { -- Shockwave
+				Color = "TAN",
+			},
+			[12809] = { -- Concussion Blow
+				Color = "TAN",
+			},
+			[12292] = { -- Death Wish
+				Color = "TAN",
+			},
+
+
+
+			-- DEATHKNIGHT
+			[47528] = { -- Mind Freeze
+				Color = "RED",
+			},
+			[47481] = { -- Gnaw
+				Color = "RED",
+			},
+			[47476] = { -- Strangulate
+				Color = "RED",
+			},
+			[48743] = { -- Death Pact
+				Color = "RED",
+			},
+			[49206] = { -- Summon Gargoyle
+				Color = "RED",
+			},
+[49940] = { -- Blood Boil
+				Color = "RED",
+			},
+			[49941] = { -- Blood Boil
+				Color = "RED",
+			},
+
+			-- Heals
+			-------------------------------------
+				-- Priest
+				[25235] = {Color = "WHITE"}, -- Flash Heal
+				[25213] = {Color = "WHITE"}, -- Greater Heal
+				[32546] = {Color = "WHITE"}, -- Binding Heal
+				-- Druid
+				[26979] = {Color = "ORANGE"}, -- Healing Touch
+				[26980] = {Color = "ORANGE"}, -- Regrowth
+				[26983] = {Color = "ORANGE"}, -- Tranquility
+				-- Shaman 
+				[25396] = {Color = "YELLOW"}, -- Healing Wave
+				[25420] = {Color = "YELLOW"}, -- Lesser Healing Wave
+				-- Paladin
+				[27137] = {Color = "PINK"}, -- Flash of Light
+				[27136] = {Color = "PINK"}, -- Holy Light
+
+			-- Ressurects/Summons
+		-------------------------------------
+			-- Druid
+				[50763] = {Color = "ORANGE"},   -- Revive
+			-- Paladin
+				[48950] = {Color = "PINK"},   -- Redemption
+			-- Priest
+				[48171] = {Color = "WHITE"},   -- Resurrect
+				[34433] = {Color = "WHITE"},   -- Shadowfiend
+				[32375] = {Color = "WHITE"},   -- Mass Dispel
+			-- Hunter
+				[982] =   {Color = "PISTACHIO"},   -- Revive Pet
+			-- Warlock
+				[712] =   {Color = "VIOLET"},   -- Summon Succubus
+				[30146] = {Color = "VIOLET"},   -- Summon Felguard
+				[691] =   {Color = "VIOLET"},   -- Summon Felhunter
+				[697] =   {Color = "VIOLET"},   -- Summon Voidwalker
+			-- Shaman
+				[49277] = {Color = "BLUE"},   -- Ancestral Spirit
+				[51533] = {Color = "BLUE"},   -- Feral spirit
+			-- Mage
+				[31687] = {Color = "AQUA"},    -- Summon Water Elem
+			-- DK
+				[49206] = {Color = "RED"},    -- Summon Gargoyle
 		}
 		AddSpellInfo(pfl.SpellCasts)
 	end
 	if not pfl.EnemyBuffs then
 		pfl.EnemyBuffs = {
-				[642] = { -- Divine Shield
-					Color = "PINK",
-				},
-				[498] = { -- Divine Protection
-					Color = "PINK",
-				},
-				[10060] = { -- Power Infusion
-					Color = "WHITE",
-				},
-				[6346] = { -- Fear Ward
-					Color = "WHITE",
-				},
-				[12043] = { -- Presence of Mind
-					Color = "AQUA",
-				},
-				[48792] = { -- Icebound Fortitude
-					Color = "RED",
-				},
-				[49039] = { -- Lichborne
-					Color = "RED",
-				},
-				[47585] = { -- Dispersion
-					Color = "WHITE",
-				},
-				[45438] = { -- Ice Block
-					Color = "AQUA",
-				},
-				[6940] = { -- Blessing of Sacrifice
-					Color = "PINK",
-				},
-				[61336] = { -- Survival Instincts
-					Color = "ORANGE",
-				},
-				[22812] = { -- Barkskin
-					Color = "ORANGE",
-				},
-				[216890] = { -- Spell Reflection
-					Color = "TAN",
-				},
-				[18499] = { -- Berserker rage
-					Color = "TAN",
-				},
-				[20230] = { -- Retaliation
-					Color = "TAN",
-				},
-				[1719] = { -- Recklessness
-					Color = "TAN",
-				},
-				[871] = { -- Shield Wall
-					Color = "TAN",
-				},
-				[1022] = { -- Blessing of Protection
-					Color = "PINK",
-				},
-				[12472] = { -- Icy Veins
-					Color = "AQUA",
-				},
-				[1044] = { -- Blessing of Freedom
-					Color = "PINK",
-				},
-				[48707] = { -- Anti-Magic Shell
-					Color = "RED",
-				},
-				[18708] = { -- Fel Domination
-					Color = "VIOLET",
-				},
-				[12051] = { -- Evocation
-					Color = "AQUA",
-				},
-				[66] = { -- Invisibility
-					Color = "AQUA",
-				},
-				[12042] = { -- Arcane power
-					Color = "AQUA",
-				},
-				[19263] = { -- Deterrence 
-					Color = "PISTACHIO",
-				},
-				[29166] = { -- Innervate				
-					Color = "ORANGE",
-				},
-				[32182] = 2825,
-				[2825] = { -- Bloodlust
-					Color = "BLUE",
-				},
-				[30823] = { -- Shamanistic rage
-					Color = "BLUE",
-				},
-				[16188] = { -- Nature's Swiftness
-					Color = "BLUE",
-				},
-				[16166] = { -- Elemental Mastery
-					Color = "BLUE",
-				},
-				[17116] = { -- Nature's Swiftness
-					Color = "ORANGE",
-				},
-				[31884] = { -- Avenging wrath
-					Color = "PINK",
-				},
-				[19574] = { -- Best within
-					Color = "PISTACHIO",
-				},
-				[33206] = { -- Pain Suppression
-					Color = "WHITE",
-				},
-				[47986] = { -- Sacrifice
-					Color = "VIOLET",
-				},
-				[31224] = { -- Cloak of Shadow
-					Color = "YELLOW",
-				},
-				[31230] = { -- Cheat Death
-					Color = "YELLOW",
-				},
-				[51713] = { -- Shadow Dance
-					Color = "YELLOW",
-				},
-				[26669] = { -- Evasion
-					Color = "YELLOW",
-				},
-				[26889] = { -- Vanish
-					Color = "YELLOW",
-				},
-				[7744] = { -- Will of the Forsaken
-					Color = "GREY",
-				},
-				[20594] = { -- Stoneform
-					Color = "GREY",
-				},
+			[642] = { -- Divine Shield
+				Color = "PINK",
+			},
+			[498] = { -- Divine Protection
+				Color = "PINK",
+			},
+			[10060] = { -- Power Infusion
+				Color = "WHITE",
+			},
+			[6346] = { -- Fear Ward
+				Color = "WHITE",
+			},
+			[12043] = { -- Presence of Mind
+				Color = "AQUA",
+			},
+			[48792] = { -- Icebound Fortitude
+				Color = "RED",
+			},
+			[49039] = { -- Lichborne
+				Color = "RED",
+			},
+			[47585] = { -- Dispersion
+				Color = "WHITE",
+			},
+			[45438] = { -- Ice Block
+				Color = "AQUA",
+			},
+			[6940] = { -- Blessing of Sacrifice
+				Color = "PINK",
+			},
+			[61336] = { -- Survival Instincts
+				Color = "ORANGE",
+			},
+			[22812] = { -- Barkskin
+				Color = "ORANGE",
+			},
+			[23920] = { -- Spell Reflection
+				Color = "TAN",
+			},
+			[18499] = { -- Berserker rage
+				Color = "TAN",
+			},
+			[20230] = { -- Retaliation
+				Color = "TAN",
+			},
+			[1719] = { -- Recklessness
+				Color = "TAN",
+			},
+			[871] = { -- Shield Wall
+				Color = "TAN",
+			},
+			[1022] = { -- Blessing of Protection
+				Color = "PINK",
+			},
+			[12472] = { -- Icy Veins
+				Color = "AQUA",
+			},
+			[1044] = { -- Blessing of Freedom
+				Color = "PINK",
+			},
+			[48707] = { -- Anti-Magic Shell
+				Color = "RED",
+			},
+			[18708] = { -- Fel Domination
+				Color = "VIOLET",
+			},
+			[12051] = { -- Evocation
+				Color = "AQUA",
+			},
+			[66] = { -- Invisibility
+				Color = "AQUA",
+			},
+			[12042] = { -- Arcane power
+				Color = "AQUA",
+			},
+			[19263] = { -- Deterrence
+				Color = "PISTACHIO",
+			},
+			[29166] = { -- Innervate
+				Color = "ORANGE",
+			},
+			[2825] = { -- Bloodlust
+				Color = "BLUE",
+			},
+			[32182] = { -- Bloodlust
+				Color = "BLUE",
+			},
+			[30823] = { -- Shamanistic rage
+				Color = "BLUE",
+			},
+			[16188] = { -- Nature's Swiftness
+				Color = "BLUE",
+			},
+			[16166] = { -- Elemental Mastery
+				Color = "BLUE",
+			},
+			[17116] = { -- Nature's Swiftness
+				Color = "ORANGE",
+			},
+			[31884] = { -- Avenging wrath
+				Color = "PINK",
+			},
+			[19574] = { -- Best within
+				Color = "PISTACHIO",
+			},
+			[33206] = { -- Pain Suppression
+				Color = "WHITE",
+			},
+			[47986] = { -- Sacrifice
+				Color = "VIOLET",
+			},
+			[31224] = { -- Cloak of Shadow
+				Color = "YELLOW",
+			},
+			[31230] = { -- Cheat Death
+				Color = "YELLOW",
+			},
+			[51713] = { -- Shadow Dance
+				Color = "YELLOW",
+			},
+			[26669] = { -- Evasion
+				Color = "YELLOW",
+			},
+			[26889] = { -- Vanish
+				Color = "YELLOW",
+			},
+			[7744] = { -- Will of the Forsaken
+				Color = "GREY",
+			},
+			[20594] = { -- Stoneform
+				Color = "GREY",
+			},
+			[32594] = {Color = "BLUE"},  -- Earth Shield
 		}
 		AddSpellInfo(pfl.EnemyBuffs)
 	end
 	if not pfl.FriendlyDebuffs then
 		pfl.FriendlyDebuffs = {
-				[47476] = { -- Strangulate
-					Color = "RED",
-				},
-				[5246] = { -- Intimidating Shout
-					Color = "TAN",
-				},
-				[5484] = { -- Howl of Terror
-					Color = "VIOLET",
-				},
-				[107570] = { -- Storm Bolt
-					Color = "TAN",
-				},
-				[8122] = { -- Psychic Scream
-					Color = "WHITE",
-				},
-				[853] = { -- Hammer of Justice
-					Color = "PINK",
-				},
-				[211522] = { -- Psyfiend
-					Color = "WHITE",
-				},
-				[221562] = { -- Asphyxiate
-					Color = "RED",
-				},
-				[15487] = { -- Silence
-					Color = "WHITE",
-				},
-				[31661] = { -- Dragon's Breath
-					Color = "AQUA",
-				},
-				[77606] = { -- Dark Simulacrum
-					Color = "RED",
-				},
+			[47476] = { -- Strangulate
+				Color = "RED",
+			},
+			[5246] = { -- Intimidating Shout
+				Color = "TAN",
+			},
+			[5484] = { -- Howl of Terror
+				Color = "VIOLET",
+			},
+			[8122] = { -- Psychic Scream
+				Color = "WHITE",
+			},
+			[853] = { -- Hammer of Justice
+				Color = "PINK",
+			},
+			[15487] = { -- Silence
+				Color = "WHITE",
+			},
+			[31661] = { -- Dragon's Breath
+				Color = "AQUA",
+			},
+			[6358] = { -- Seduction
+				Color = "VIOLET",
+			},
+			[24259] = { -- Spell Lock Warlock's pet
+				Color = "VIOLET",
+			},
+			[19244] = { -- Spell Lock Warlock's pet
+				Color = "VIOLET",
+			},
+			[19647] = { -- Spell Lock Warlock's pet
+				Color = "VIOLET",
+			},
 		}
 		AddSpellInfo(pfl.FriendlyDebuffs)
 	end
@@ -754,18 +933,18 @@ function addon:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileReset", "ProfileChanged")
 
 	if LDB then
-		self.Launcher = LDB:NewDataObject("CastAnnouncer", 
-		{
-			type = "launcher",
-			icon = "Interface\\Icons\\Spell_Fire_Flare",
-			OnClick = function(_, button)
-				addon.OpenConfig()
-			end,
-			OnTooltipShow = function(tooltip)
-				tooltip:AddLine("CastAnnouncer")
-				tooltip:AddLine(L["|cff99ff33Click|r to open the config"])
-			end,
-		})
+		self.Launcher = LDB:NewDataObject("CastAnnouncer",
+				{
+					type = "launcher",
+					icon = "Interface\\Icons\\Spell_Fire_Flare",
+					OnClick = function(_, button)
+						addon.OpenConfig()
+					end,
+					OnTooltipShow = function(tooltip)
+						tooltip:AddLine("CastAnnouncer")
+						tooltip:AddLine(L["|cff99ff33Click|r to open the config"])
+					end,
+				})
 		if LDBIcon then LDBIcon:Register("CastAnnouncer",self.Launcher,self.db.global.Minimap) end
 	end
 
@@ -923,7 +1102,7 @@ do
 			unitlist[#unitlist+1] = uid
 		end
 	end
-	
+
 	addids("target")
 	addids("arena",1,5)
 	addids("focus")
@@ -950,7 +1129,7 @@ do
 	function addon:FindTargetInfo(srcGUID)
 		for i=1,levels do
 			for k,id in ipairs(unit_to_unittarget) do
-				if id ~= END and UnitExists(id) then 
+				if id ~= END and UnitExists(id) then
 					local nextid = targetof[id]
 					if UnitGUID(id) == srcGUID then
 						reset()
@@ -1006,7 +1185,7 @@ function addon:FormatInfo(srcName,srcGUID,spellName,icon,sound,cat,color,forcedD
 	if pfl.SpellNames then
 		srcName = srcName ~= "" and srcName .. " - "..spellName or spellName
 	end
-	
+
 	if pfl.UnitIDCaster then
 		for i = 1, #units do
 			if srcGUID == UnitGUID(units[i]) then
@@ -1016,13 +1195,13 @@ function addon:FormatInfo(srcName,srcGUID,spellName,icon,sound,cat,color,forcedD
 	end
 
 	if pfl.ShowTarget and pfl.TargetGraphic == "text" then
-		if same then 
+		if same then
 			alert.text:SetText(srcName.." <")
-		else 
-			alert.text:SetText((dstExists and dstName) and srcName.." > "..dstName or srcName) 
+		else
+			alert.text:SetText((dstExists and dstName) and srcName.." > "..dstName or srcName)
 		end
-	else 
-		alert.text:SetText(srcName) 
+	else
+		alert.text:SetText(srcName)
 	end
 
 	alert.text2:SetText(dstName)
@@ -1062,48 +1241,49 @@ local bor = bit.bor
 function addon:UpdateFilters()
 	local Filters = pfl.Filters
 	SPELLCASTS_FILTER = bor(
-		Filters.SpellCasts.Players and COMBATLOG_OBJECT_TYPE_PLAYER or 0,
-		Filters.SpellCasts.NPCs and COMBATLOG_OBJECT_TYPE_NPC or 0
+			Filters.SpellCasts.Players and COMBATLOG_OBJECT_TYPE_PLAYER or 0,
+			Filters.SpellCasts.NPCs and COMBATLOG_OBJECT_TYPE_NPC or 0,
+			Filters.SpellCasts.Pets	and COMBATLOG_OBJECT_TYPE_PET or 0
 	)
 	ENEMYBUFFS_FILTER = bor(
-		Filters.EnemyBuffs.Players and COMBATLOG_OBJECT_TYPE_PLAYER or 0,
-		Filters.EnemyBuffs.NPCs and COMBATLOG_OBJECT_TYPE_NPC or 0
+			Filters.EnemyBuffs.Players and COMBATLOG_OBJECT_TYPE_PLAYER or 0,
+			Filters.EnemyBuffs.NPCs and COMBATLOG_OBJECT_TYPE_NPC or 0
 	)
 	FRIENDLYDEBUFFS_FILTER = bor(
-		Filters.FriendlyDebuffs.Players and COMBATLOG_OBJECT_TYPE_PLAYER or 0,
-		Filters.FriendlyDebuffs.NPCs and COMBATLOG_OBJECT_TYPE_NPC or 0
+			Filters.FriendlyDebuffs.Players and COMBATLOG_OBJECT_TYPE_PLAYER or 0,
+			Filters.FriendlyDebuffs.NPCs and COMBATLOG_OBJECT_TYPE_NPC or 0
 	)
 end
 
 local band = bit.band
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 function addon:COMBAT_LOG_EVENT_UNFILTERED()
-	
+
 	-- Extract event payload (it's no longer being passed by the event iself as of 8.0.1)
 	local timestamp, eventType, hideCaster, srcGuid, srcName, srcFlags, srcRaidFlags, dstGuid, dstName, dstFlags, dstRaidFlags, spellID, spellName, spellSchool, auraType = CombatLogGetCurrentEventInfo()
-CA:Debug("Detected " .. tostring(eventType) .. " with srcName = " .. tostring(srcName) .. ", dstName = " .. tostring(dstName) .. ", spellName = " .. tostring(spellName) .. " (" .. tostring(spellID) .. "), auraType = " .. tostring(auraType))	
+	CA:Debug("Detected " .. tostring(eventType) .. " with srcName = " .. tostring(srcName) .. ", dstName = " .. tostring(dstName) .. ", spellName = " .. tostring(spellName) .. " (" .. tostring(spellID) .. "), auraType = " .. tostring(auraType))
 	if not spellID then return end
 	if self.db.global.ArenaOnly then
 		local _, instanceType = IsInInstance();
 		if not (instanceType == "arena") then
 			return
 		end
-CA:Debug("Detected CombatLogEvent in ARENA instance")
+		CA:Debug("Detected CombatLogEvent in ARENA instance")
 	end
 	if SpellCastEvents[eventType] and band(srcFlags, COMBATLOG_HOSTILE) == COMBATLOG_HOSTILE and SpellCasts[spellName] then
-CA:Debug("Detected hostile spell cast event with auraType = " .. tostring(auraType))
-CA:Debug("Detected CombatLogEvent with srcName = " .. tostring(srcName) .. ", dstName = " .. tostring(dstName) .. ", spellName = " .. tostring(spellName) .. " (" .. tostring(spellID) .. "), auraType = " .. tostring(auraType))	
+		CA:Debug("Detected hostile spell cast event with auraType = " .. tostring(auraType))
+		CA:Debug("Detected CombatLogEvent with srcName = " .. tostring(srcName) .. ", dstName = " .. tostring(dstName) .. ", spellName = " .. tostring(spellName) .. " (" .. tostring(spellID) .. "), auraType = " .. tostring(auraType))
 		if pfl.TargetOnly and band(srcFlags) ~= COMBATLOG_TARGET then return end
 		if band(SPELLCASTS_FILTER,srcFlags) == 0 then return end
 		self:FormatInfo(StrippedName[srcName],srcGUID,spellName,Icons[spellID],SpellCasts[spellName].Sound,SPELLCASTS,colors[SpellCasts[spellName].Color])
 	elseif eventType == "SPELL_AURA_APPLIED" then
-CA:Debug("Detected SPELL_AURA_APPLIED with auraType = " .. tostring(auraType))
+		CA:Debug("Detected SPELL_AURA_APPLIED with auraType = " .. tostring(auraType))
 		if pfl.TargetOnly and band(dstFlags) ~= COMBATLOG_TARGET then return end
 		if auraType == "BUFF" and band(dstFlags,COMBATLOG_HOSTILE) == COMBATLOG_HOSTILE and EnemyBuffs[spellName] and band(ENEMYBUFFS_FILTER,dstFlags) > 0 then
-CA:Debug("Detected buff application with auraType = " .. tostring(auraType))			
+			CA:Debug("Detected buff application with auraType = " .. tostring(auraType))
 			self:FormatInfo(StrippedName[dstName],dstGUID,spellName,Icons[spellID],EnemyBuffs[spellName].Sound,ENEMYBUFFS,colors[EnemyBuffs[spellName].Color])
 		elseif auraType == "DEBUFF" and band(dstFlags,COMBATLOG_FRIENDLY) == COMBATLOG_FRIENDLY and FriendlyDebuffs[spellName] and band(FRIENDLYDEBUFFS_FILTER) > 0 then
-CA:Debug("Detected debuff application with auraType = " .. tostring(auraType))
+			CA:Debug("Detected debuff application with auraType = " .. tostring(auraType))
 			self:FormatInfo(StrippedName[dstName],dstGUID,spellName,Icons[spellID],FriendlyDebuffs[spellName].Sound,FRIENDLYDEBUFFS,colors[FriendlyDebuffs[spellName].Color])
 		end
 	end
@@ -1188,7 +1368,7 @@ function addon:GetOptions()
 				name = "|cff00ff00"..L["Version"].."|r: "..GetAddOnMetadata("CastAnnouncer","Version"),
 				order = 80,
 			},
-			
+
 			Settings_Group = {
 				type = "group",
 				name = L["Settings"],
@@ -1265,11 +1445,16 @@ function addon:GetOptions()
 												name = L["NPCs"],
 												order = 200,
 											},
+											Pets = {
+												type = "toggle",
+												name = L["Pets"],
+												order = 300,
+											},
 											TargetIsSelf = {
 												type = "toggle",
 												name = L["Target is YOU"],
 												desc = L["Show alerts only if the spell is going to affect you. Not 100% reliable outside of arena"],
-												order = 300,
+												order = 400,
 											},
 										},
 									},
@@ -1317,7 +1502,7 @@ function addon:GetOptions()
 							},
 						},
 					},
-					
+
 					Sliders_Group = {
 						type = "group",
 						name = L["Sliders"],
@@ -1451,7 +1636,7 @@ function addon:GetOptions()
 								order = 140,
 								get = function() return ListSelect end,
 								set = function(info,value) ListSelect = value end,
-								values = function() 
+								values = function()
 									self.listTemp = self.listTemp or {}
 									wipe(self.listTemp)
 									for k,v in pairs(pfl[pfl.CategorySelect]) do
@@ -1476,7 +1661,7 @@ function addon:GetOptions()
 								type = "group",
 								name = function()
 									if not ListSelect then
-										return L["Attributes"] 
+										return L["Attributes"]
 									else
 										return L["Attributes"] .." of "..ListSelect
 									end
@@ -1507,7 +1692,7 @@ function addon:GetOptions()
 											self.sounds = self.sounds or {}
 											wipe(self.sounds)
 											for _, name in pairs(SM:List("sound")) do self.sounds[name] = name end
-											return self.sounds	
+											return self.sounds
 										end,
 										dialogControl = "LSM30_Sound",
 									},
