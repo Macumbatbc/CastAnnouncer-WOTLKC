@@ -1,11 +1,11 @@
-## Interface: 20500
-## Author: Kollektiv & others
+## Interface: 30401
+## Author: Kollektiv & others (Macumba)
 ## Notes: Tracks and displays (targeted) spell casts anywhere
-## Title: CastAnnouncer
-## Version: v9.0.1 (r3-release-2)
+## Title: CastAnnouncer WOTLKC
+## Version: v10
 ## OptionalDeps: Ace3, !ClassColors, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, AceGUI-3.0-Spell-EditBox
 ## SavedVariables: CastAnnouncerDB
-## X-Curse-Packaged-Version: v9.0.1 (r3-release-2)
+## X-Curse-Packaged-Version: v10
 ## X-Curse-Project-Name: CastAnnouncer
 ## X-Curse-Project-ID: cast-announcer
 ## X-Curse-Repository-ID: wow/cast-announcer/mainline
