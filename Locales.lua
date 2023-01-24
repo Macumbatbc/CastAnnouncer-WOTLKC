@@ -44,6 +44,7 @@ L["Lock"] = true
 L["Look and feel"] = true
 L["Minimap"] = true
 L["NPCs"] = true
+L["Pets"] = true
 L["Orange"] = true
 L["Peach"] = true
 L["Pink"] = true

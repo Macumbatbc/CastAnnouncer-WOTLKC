@@ -10,7 +10,7 @@ local buttonHeight = 16
 local buttonNum = 11
 
 local font = CreateFont("SA_FauxScrollFrameButtonFont")
-font:SetFont(GameFontNormal:GetFont(),12)
+font:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE, MONOCHROME")
 font:SetJustifyH("LEFT")
 
 local function fixlevels(parent,...)
